@@ -1,36 +1,43 @@
-# JD_project_2
+# Assignment 1
 
-#### Description
-{**When you're done, you can delete the content in this README and update the file with details for others getting started with your repository**}
+#### Files
 
-#### Software Architecture
-Software architecture description
+​	data/
 
-#### Installation
+​		data_utils.py: Helper functions or classes used in data processing.
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+​		process.py: Process a raw dataset into a sample file.
 
-#### Instructions
+​	model/
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+​		config.py: Define configuration parameters.
 
-#### Contribution
+​		dataset.py: Define the format of samples used in the model.
 
-1.  Fork the repository
-2.  Create Feat_xxx branch
-3.  Commit your code
-4.  Create Pull Request
+​		evaluate.py: Evaluate the loss in the dev set.
 
+​		model.py: Define the model.
 
-#### Gitee Feature
+​		predict.py: Generate a summary.
 
-1.  You can use Readme\_XXX.md to support different languages, such as Readme\_en.md, Readme\_zh.md
-2.  Gitee blog [blog.gitee.com](https://blog.gitee.com)
-3.  Explore open source project [https://gitee.com/explore](https://gitee.com/explore)
-4.  The most valuable open source project [GVP](https://gitee.com/gvp)
-5.  The manual of Gitee [https://gitee.com/help](https://gitee.com/help)
-6.  The most popular members  [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+​		rouge_eval.py: Evaluate the model with ROUGE score.
+
+​		train.py: Train the model.
+
+​		utils.py: Helper functions or classes used for the model.
+
+​		vocal.py: Define the vocabulary object.
+
+​		
+
+#### TO-DO list:
+
+​	model/model.py: 
+
+​		line 26, 54, 81, 122, 261
+
+​	model/predict.py:
+
+​		line 59, 107, 168
+
+#### 

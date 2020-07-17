@@ -3,7 +3,7 @@
 '''
 @Author: lpx, jby
 @Date: 2020-07-13 11:00:51
-@LastEditTime: 2020-07-16 17:44:36
+@LastEditTime: 2020-07-16 20:24:58
 @LastEditors: Please set LastEditors
 @Description: Generate a summary.
 @FilePath: /JD_project_2/baseline/model/predict.py
@@ -69,7 +69,7 @@ class Predict():
         summary = [self.vocab.SOS]
 
         # Generate hypothesis with maximum decode step.
-        while int(decoder_input_t.tolist()[0]) != (self.vocab.EOS) \
+        while int(decoder_input_t.item()) != (self.vocab.EOS) \
                 and len(summary) < max_sum_len:
 
             context_vector, attention_weights = \
@@ -206,6 +206,8 @@ class Predict():
 
             topk = []
             for beam in curr:
+                # When an EOS token is generated, add the hypo to the completed
+                # list and decrease beam size.
                 if beam.tokens[-1] == self.vocab.EOS:
                     completed.append(beam)
                     k -= 1
@@ -281,7 +283,9 @@ if __name__ == "__main__":
         picked = random.choice(list(test))
         source, ref = picked.strip().split('<sep>')
 
-    prediction = pred.predict(source.split(),  beam_search=True)
+    greedy_prediction = pred.predict(source.split(),  beam_search=False)
+    beam_prediction = pred.predict(source.split(),  beam_search=True)
 
-    print('hypo: ', prediction)
+    print('greedy: ', greedy_prediction)
+    print('beam: ', beam_prediction)
     print('ref: ', ref)

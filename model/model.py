@@ -3,7 +3,7 @@
 '''
 @Author: your name
 @Date: 2020-07-13 11:00:51
-@LastEditTime: 2020-07-16 17:35:06
+@LastEditTime: 2020-07-16 19:57:34
 @LastEditors: Please set LastEditors
 @Description: Define the model.
 @FilePath: /JD_project_2/baseline/model/model.py
@@ -80,6 +80,7 @@ class Attention(nn.Module):
                 The shape is (batch_size, 2*hidden_units).
             attention_weights (Tensor): The shape is (batch_size, seq_length).
         """
+        # Concatenate h and c to get s_t and expand the dim of s_t.
         h_dec, c_dec = decoder_states
         # (1, batch_size, 2*hidden_units)
         s_t = torch.cat([h_dec, c_dec], dim=2)
@@ -265,6 +266,7 @@ class Seq2seq(nn.Module):
         x_copy = torch.where(x > len(self.v) - 1, oov_token, x)
         x_padding_masks = torch.ne(x_copy, 0).byte().float()
         encoder_output, encoder_states = self.encoder(x_copy)
+        # Reduce encoder hidden states.
         decoder_states = self.reduce_state(encoder_states)
 
         # Calculate loss for every step.
