@@ -8,4 +8,6 @@
 | resnet18  | 0.901 |0.541|
 | mobilenet_v2  | 0.92 |0.459|
 | SpinalNet_ResNet  | 0.98 |0.08|
+
+
 *训练集:验证集 = 8 :2* 
