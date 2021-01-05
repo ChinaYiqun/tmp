@@ -1,7 +1,7 @@
 # Flower102 
 
 
-[SOTA models on flower102 datasets]( https://paperswithcode.com/sota/image-classification-on-flowers-102)
+[SOTA models on flower102 dataset]( https://paperswithcode.com/sota/image-classification-on-flowers-102)
 |  模型   | valid acc(top1)  | train loss|
 |  ----  | ----  | ---- |
 | resnet18  | 0.901 |0.541|
