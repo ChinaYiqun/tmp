@@ -3,19 +3,27 @@
 '''
 @Author: lpx, jby
 @Date: 2020-07-13 11:00:51
-@LastEditTime: 2020-07-16 20:24:58
+@LastEditTime: 2020-07-21 11:30:41
 @LastEditors: Please set LastEditors
 @Description: Generate a summary.
 @FilePath: /JD_project_2/baseline/model/predict.py
 '''
 
-import config
-import torch
-from dataset import PairDataset
-from model import Seq2seq
-from utils import source2ids, outputids2words, Beam, timer, add2heap
-import jieba
 import random
+import os
+import sys
+import pathlib
+
+import torch
+import jieba
+
+abs_path = pathlib.Path(__file__).parent.absolute()
+sys.path.append(sys.path.append(abs_path))
+
+import config
+from model import Seq2seq
+from dataset import PairDataset
+from utils import source2ids, outputids2words, Beam, timer, add2heap
 
 
 class Predict():
@@ -85,13 +93,7 @@ class Predict():
             decoder_input_t = torch.argmax(p_vocab, dim=1).to(self.DEVICE)
             decoder_word_idx = decoder_input_t.item()
             summary.append(decoder_word_idx)
-
-            oov_token = torch.full(decoder_input_t.shape, self.vocab.UNK)
-            oov_token = oov_token.long().to(self.DEVICE)
-            decoder_input_t = \
-                torch.where(decoder_input_t > len(self.vocab) - 1,
-                            oov_token,
-                            decoder_input_t).to(self.DEVICE)
+            decoder_input_t = self.replace_oov(decoder_input_t)
 
         return summary
 
@@ -122,11 +124,7 @@ class Predict():
 
         # Replace the indexes of OOV words with the index of OOV token
         # to prevent index-out-of-bound error in the decoder.
-        oov_token = torch.full(decoder_input_t.shape,
-                               self.vocab.UNK).long().to(self.DEVICE)
-        decoder_input_t = torch.where(decoder_input_t > len(self.vocab) - 1,
-                                      oov_token,
-                                      decoder_input_t)
+        decoder_input_t = self.replace_oov(decoder_input_t)
         p_vocab, decoder_states = self.model.decoder(decoder_input_t,
                                                      beam.decoder_states,
                                                      encoder_output,
@@ -254,8 +252,7 @@ class Predict():
         x, oov = source2ids(text, self.vocab)
         x = torch.tensor(x).to(self.DEVICE)
         max_oovs = len(oov)
-        oov_token = torch.full(x.shape, self.vocab.UNK).long().to(self.DEVICE)
-        x_copy = torch.where(x > len(self.vocab) - 1, oov_token, x)
+        x_copy = self.replace_oov(x)
         x_copy = x_copy.unsqueeze(0)
         x_padding_masks = torch.ne(x_copy, 0).byte().float()
         if beam_search:
@@ -274,6 +271,21 @@ class Predict():
                                   self.vocab)
         return summary.replace('<SOS>', '').replace('<EOS>', '').strip()
 
+    def replace_oov(self, input_t):
+        """Replace oov tokens with <UNK> token in an input tensor.
+
+        Args:
+            input_t (Tensor): The input tensor.
+
+        Returns:
+            Tensor: All oov tokens are replaced with <UNK> token.
+        """
+        oov_token = torch.full(input_t.shape,
+                               self.vocab.UNK).long().to(self.DEVICE)
+        input_t = torch.where(input_t > len(self.vocab) - 1,
+                              oov_token,
+                              input_t)
+        return input_t
 
 if __name__ == "__main__":
     pred = Predict()

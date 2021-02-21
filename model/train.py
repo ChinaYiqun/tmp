@@ -3,28 +3,34 @@
 '''
 @Author: lpx, jby
 @Date: 2020-07-13 12:31:25
-@LastEditTime: 2020-07-16 17:55:16
+@LastEditTime: 2020-07-21 11:27:05
 @LastEditors: Please set LastEditors
 @Description: Train the model.
 @FilePath: /JD_project_2/baseline/model/train.py
 '''
 
 
-import torch
-from model import Seq2seq
+import pickle
 import os
+import sys
+import pathlib
+
 import numpy as np
-from dataset import SampleDataset
 from torch import optim
 from torch.utils.data import DataLoader
-import pickle
+import torch
 from torch.nn.utils import clip_grad_norm_
-from dataset import collate_fn
 from tqdm import tqdm
-from evaluate import evaluate
-import config
 from tensorboardX import SummaryWriter
+
+abs_path = pathlib.Path(__file__).parent.absolute()
+sys.path.append(sys.path.append(abs_path))
+
 from dataset import PairDataset
+from model import Seq2seq
+import config
+from evaluate import evaluate
+from dataset import collate_fn, SampleDataset
 
 
 def train(dataset, val_dataset, v, start_epoch=0):
@@ -51,10 +57,8 @@ def train(dataset, val_dataset, v, start_epoch=0):
     print("initializing optimizer")
 
     # Define the optimizer.
-    optimizer = optim.Adagrad(model.parameters(),
-                              lr=config.learning_rate,
-                              lr_decay=config.lr_decay,
-                              initial_accumulator_value=config.initial_accumulator_value)
+    optimizer = optim.Adam(model.parameters(),
+                           lr=config.learning_rate)
     train_dataloader = DataLoader(dataset=train_data,
                                   batch_size=config.batch_size,
                                   shuffle=True,
@@ -99,11 +103,12 @@ def train(dataset, val_dataset, v, start_epoch=0):
                     optimizer.step()  # Update weights.
 
                     # Output and record epoch loss every 100 batches.
-                    if (batch+1 % 100) == 0:
+                    if (batch % 100) == 0:
                         batch_progress.set_description(f'Epoch {epoch}')
                         batch_progress.set_postfix(Batch=batch,
                                                    Loss=loss.item())
                         batch_progress.update()
+                        # Write loss for tensorboard.
                         writer.add_scalar(f'Average loss for epoch {epoch}',
                                           np.mean(batch_losses),
                                           global_step=batch)

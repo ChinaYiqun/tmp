@@ -3,20 +3,26 @@
 '''
 @Author: jby
 @Date: 2020-07-13 11:00:51
-@LastEditTime: 2020-07-16 15:45:18
+@LastEditTime: 2020-07-21 10:22:58
 @LastEditors: Please set LastEditors
 @Description: Define the format of data used in the model.
 @FilePath: /JD_project_2/baseline/model/dataset.py
 '''
 
 
-from typing import Callable
-from utils import simple_tokenizer, count_words
-from vocab import Vocab
-from torch.utils.data import Dataset
-import torch
-from utils import sort_batch_by_len, source2ids
+import sys
+import os
+import pathlib
 from collections import Counter
+from typing import Callable
+
+import torch
+from torch.utils.data import Dataset
+
+abs_path = pathlib.Path(__file__).parent.absolute()
+sys.path.append(sys.path.append(abs_path))
+from utils import simple_tokenizer, count_words, sort_batch_by_len, source2ids
+from vocab import Vocab
 import config
 
 
@@ -101,11 +107,11 @@ class SampleDataset(Dataset):
     def __getitem__(self, index):
         x, oov = source2ids(self.src_sents[index], self.vocab)
         return {
-            'x': [self.vocab.SOS] + x,
+            'x': [self.vocab.SOS] + x + [self.vocab.EOS],
             'OOV': oov,
             'len_OOV': len(oov),
             'y': [self.vocab.SOS] +
-                 [self.vocab[x] for x in self.trg_sents[index]],
+                 [self.vocab[x] for x in self.trg_sents[index]] + [self.vocab.EOS],
             'x_len': len(self.src_sents[index]),
             'y_len': len(self.trg_sents[index])
         }

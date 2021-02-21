@@ -3,17 +3,23 @@
 '''
 @Author: your name
 @Date: 2020-07-13 11:00:51
-@LastEditTime: 2020-07-16 19:57:34
+@LastEditTime: 2020-07-18 17:24:43
 @LastEditors: Please set LastEditors
 @Description: Define the model.
 @FilePath: /JD_project_2/baseline/model/model.py
 '''
 
 
-import torch
 import os
+import sys
+import pathlib
+
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+abs_path = pathlib.Path(__file__).parent.absolute()
+sys.path.append(sys.path.append(abs_path))
 import config
 
 
@@ -156,8 +162,6 @@ class Decoder(nn.Module):
                 The lstm states in the decoder.
                 The shapes are (1, batch_size, hidden_units) for each.
         """
-        # embedding look-up layer
-        # (batch_size, seq_length, hidden_units)
         decoder_emb = self.embedding(decoder_input)
 
         decoder_output, decoder_states = self.lstm(decoder_emb, decoder_states)
@@ -191,9 +195,6 @@ class ReduceState(nn.Module):
     def __init__(self):
         super(ReduceState, self).__init__()
 
-        self.reduce_h = nn.Linear(config.hidden_size * 2, config.hidden_size)
-        self.reduce_c = nn.Linear(config.hidden_size * 2, config.hidden_size)
-
     def forward(self, hidden):
         """The forward propagation of reduce state module.
 
@@ -208,12 +209,9 @@ class ReduceState(nn.Module):
                 each with shape (1, batch_size, hidden_units).
         """
         h, c = hidden
-        h_in = h.transpose(0, 1).contiguous().view(-1, config.hidden_size * 2)
-        hidden_reduced_h = F.relu(self.reduce_h(h_in))
-        c_in = c.transpose(0, 1).contiguous().view(-1, config.hidden_size * 2)
-        hidden_reduced_c = F.relu(self.reduce_c(c_in))
-
-        return (hidden_reduced_h.unsqueeze(0), hidden_reduced_c.unsqueeze(0))
+        h_reduced = torch.sum(h, dim=0, keepdim=True)
+        c_reduced = torch.sum(c, dim=0, keepdim=True)
+        return (h_reduced, c_reduced)
 
 
 class Seq2seq(nn.Module):
@@ -235,9 +233,6 @@ class Seq2seq(nn.Module):
                                config.hidden_size,
                                )
         self.reduce_state = ReduceState()
-        self.lambda_cov = torch.tensor(1.,
-                                       requires_grad=False,
-                                       device=self.DEVICE)
 
     def load_model(self):
         if (os.path.exists(config.encoder_save_name)):

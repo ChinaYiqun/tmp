@@ -3,7 +3,7 @@
 '''
 @Author: jby
 @Date: 2020-07-13 14:18:13
-@LastEditTime: 2020-07-16 17:59:16
+@LastEditTime: 2020-07-21 11:29:45
 @LastEditors: Please set LastEditors
 @Description: Define the vocabulary object.
 @FilePath: /JD_project_2/baseline/model/vocab.py
@@ -30,7 +30,7 @@ class Vocab(object):
         """Add a new token to the vocab and do mapping between word and index.
 
         Args:
-            words (str): The token to be added.
+            words (list): The list of tokens to be added.
         """
         for word in words:
             if word not in self.word2index:
@@ -39,6 +39,15 @@ class Vocab(object):
         self.word2count.update(words)
 
     def load_embeddings(self, file_path: str, dtype=np.float32) -> int:
+        """Load embedding word vector.
+
+        Args:
+            file_path (str): The file path of word vector to load.
+            dtype (numpy dtype, optional): Defaults to np.float32.
+
+        Returns:
+            int: Number of embedded tokens.
+        """
         num_embeddings = 0
         vocab_size = len(self)
         with open(file_path, 'rb') as f:
